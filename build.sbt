@@ -9,6 +9,16 @@ lazy val oscarVisual = (project in file(".")).
     name := "oscar-visual").
   dependsOn(oscarUtil)
 
+scalacOptions ++= Seq(
+  "-encoding", "UTF-8",
+  "-unchecked",
+  "-deprecation",
+  "-feature",
+  "-Xdisable-assertions",
+  "-language:implicitConversions",
+  "-language:postfixOps"
+)
+
 libraryDependencies ++= Seq(
   "org.jfree" % "jfreechart" % "1.5.0",
   "org.swinglabs" % "swingx" % "1.6.1",

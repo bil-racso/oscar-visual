@@ -1,2 +1,3 @@
-# oscar-visual
+# OscaR-Visual
+
 OscaR visualization library
