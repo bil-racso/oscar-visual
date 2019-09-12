@@ -1,6 +1,6 @@
 lazy val oscarUtil = ProjectRef(uri("https://github.com/bil-racso/oscar-util.git"), "oscar-util")
 
-lazy val root = (project in file(".")).
+lazy val oscarVisual = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "oscarlib",
