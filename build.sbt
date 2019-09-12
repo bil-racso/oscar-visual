@@ -1,12 +1,13 @@
-scalaVersion := "2.13.0"
-
 lazy val oscarUtil = ProjectRef(uri("https://github.com/bil-racso/oscar-util.git"), "oscar-util")
 
-lazy val root = (project in file(".")).dependsOn(oscarUtil)
-
-name := "oscar-visual"
-organization := "oscarlib"
-version := "4.1.0"
+lazy val root = (project in file(".")).
+  settings(
+    inThisBuild(List(
+      organization := "oscarlib",
+      scalaVersion := "2.13.0"
+	)),
+    name := "oscar-visual").
+  dependsOn(oscarUtil)
 
 libraryDependencies ++= Seq(
   "org.jfree" % "jfreechart" % "1.5.0",
