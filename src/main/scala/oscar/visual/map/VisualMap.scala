@@ -65,6 +65,8 @@ class VisualMap extends JPanel(new BorderLayout()) {
 
   }
 
+  System.setProperty("http.agent", "Mozilla/5.0")
+
   val tf = new DefaultTileFactory(info)
   viewer.setTileFactory(tf)
   viewer.setZoom(11)

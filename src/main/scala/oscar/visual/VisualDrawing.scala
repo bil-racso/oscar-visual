@@ -1,41 +1,41 @@
 /**
- * *****************************************************************************
- * OscaR is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 2.1 of the License, or
- * (at your option) any later version.
- *
- * OscaR is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License  for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License along with OscaR.
- * If not, see http://www.gnu.org/licenses/lgpl-3.0.en.html
- * ****************************************************************************
- */
+  * *****************************************************************************
+  * OscaR is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU Lesser General Public License as published by
+  * the Free Software Foundation, either version 2.1 of the License, or
+  * (at your option) any later version.
+  *
+  * OscaR is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU Lesser General Public License  for more details.
+  *
+  * You should have received a copy of the GNU Lesser General Public License along with OscaR.
+  * If not, see http://www.gnu.org/licenses/lgpl-3.0.en.html
+  * ****************************************************************************
+  */
 package oscar.visual
 
-import java.awt.{Color, Graphics, Graphics2D}
+import java.awt.{BorderLayout, Color, Graphics, Graphics2D}
 import java.awt.event.{MouseEvent, MouseListener, MouseMotionListener}
 import java.awt.geom.{AffineTransform, Point2D}
-import javax.swing.{JPanel, SwingUtilities}
 
+import javax.swing.{JPanel, SwingUtilities}
 import oscar.visual.shapes.{VisualLine, VisualRectangle, VisualShape}
 
-import scala.collection.mutable.Queue
+import scala.collection.mutable
 
 /**
- * VisualDrawing
- *
- *  Contains and draws VisualShapes.
- */
-class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel {
+  * VisualDrawing
+  *
+  *  Contains and draws VisualShapes.
+  */
+class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel(new BorderLayout()) {
 
   setBackground(Color.white)
 
   // Shapes contained in the panel
-  protected val shapes: Queue[VisualShape] = Queue()
+  protected val shapes: mutable.Queue[VisualShape] = mutable.Queue()
 
   protected var marginT: Double = 0
   protected var marginR: Double = 0
@@ -43,7 +43,7 @@ class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel {
   protected var marginL: Double = 0
 
   /** Returns the margins of the panel. */
-  def margin = (marginT, marginR, marginB, marginL)
+  def margin: (Double, Double, Double, Double) = (marginT, marginR, marginB, marginL)
 
   /** Sets the margins of the panel. */
   def margin(m: Double): Unit = margin(m, m, m, m)
@@ -62,20 +62,33 @@ class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel {
     var maxX = Double.MinValue
     var minY = Double.MaxValue
     var maxY = Double.MinValue
-    for (shape <- shapes) {
-      val bounds = shape.getBounds
-      if (bounds._1 < minX) minX = bounds._1
-      if (bounds._2 > maxX) maxX = bounds._2
-      if (bounds._3 < minY) minY = bounds._3
-      if (bounds._4 > maxY) maxY = bounds._4
+
+    //RDL: added the try catch because there iss a race condition on shapes, which is a mutable data structure
+    //and this paint method is called in a thread that is not hte one that adds the figures.
+    //I do not know how to fix this issue,
+    // but I am a bit bored by the big red exception messages I get on the console,
+    //so I fix the symptom with this try catch
+    try {
+      for (shape <- shapes) {
+        val bounds = shape.getBounds
+        if (bounds._1 < minX) minX = bounds._1
+        if (bounds._2 > maxX) maxX = bounds._2
+        if (bounds._3 < minY) minY = bounds._3
+        if (bounds._4 > maxY) maxY = bounds._4
+      }
+    }catch{
+      case _:java.lang.IllegalArgumentException => ;
+      case _:java.util.NoSuchElementException =>;
+      case _:java.lang.NullPointerException => ;
     }
+
     (minX, maxX, minY, maxY)
   }
   var transform = new AffineTransform()
   var scale = 1.0
-  
+
   override def paint(g: Graphics): Unit = {
-	
+
     super.paintComponent(g)
     val g2d = g.asInstanceOf[Graphics2D]
     transform = new AffineTransform() // start with identity transform   
@@ -90,7 +103,7 @@ class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel {
       // Drawing size
       val dWidth = getWidth
       val dHeight = getHeight
-      
+
       // Flip
       if (flipped) {
         transform.translate(0, dHeight)
@@ -106,24 +119,35 @@ class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel {
         val ratioY = dHeight / (marginT + marginB + sHeight)
         val ratio = math.min(ratioX, ratioY) // Maintain proportions
         transform.scale(ratio, ratio)
-        
+
         // Translate
         val translateX: Int = (marginL - minX).toInt
-        val translateY: Int = ((if (flipped) marginB else marginT) - minY).toInt 
+        val translateY: Int = ((if (flipped) marginB else marginT) - minY).toInt
         transform.translate(translateX,translateY)
       }
-	  g2d.transform(transform)
-      for (s <- shapes) {
-        s.draw(g2d)
+      g2d.transform(transform)
+
+      //RDL: added the try catch because there iss a race condition on shapes, which is a mutable data structure
+      //and this paint method is called in a thread that is not hte one that adds the figures.
+      //I do not know how to fix this issue,
+      // but I am a bit bored by the big red exception messages I get on the console,
+      //so I fix the symptom with this try catch
+      try {
+        for (s <- shapes) {
+          s.draw(g2d)
+        }
+      }catch{
+        case _:java.lang.IllegalArgumentException => ;
+        case _:java.util.NoSuchElementException =>
       }
     }
   }
-  
+
   def invertTransform(p: Point2D): Point2D = {
     val clone = transform.clone().asInstanceOf[AffineTransform]
     clone.invert()
     clone.transform(new Point2D.Double(p.getX, p.getY), null)
-  } 
+  }
 
   /** Adds a new non null colored shape in the panel. */
   def addShape(shape: VisualShape, repaintAfter: Boolean = true): Unit = {
@@ -144,24 +168,24 @@ class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel {
   addMouseMotionListener {
     val drawingPanel = this
     new MouseMotionListener() {
-      override def mouseMoved(e: MouseEvent) {
+      override def mouseMoved(e: MouseEvent): Unit = {
         drawingPanel.setToolTipText("")
         for (s <- shapes) {
           s.showToolTip(e.getPoint)
-        }         
+        }
       }
-      override def mouseDragged(e: MouseEvent) {}
+      override def mouseDragged(e: MouseEvent): Unit = {}
     }
   }
-  
-  private def scale(factor: Double) {
+
+  private def scale(factor: Double): Unit = {
     scale = scale * factor
     repaint()
   }
-  
+
   addMouseListener {
     new MouseListener() {
-      override def mouseClicked(e: MouseEvent) {
+      override def mouseClicked(e: MouseEvent): Unit = {
         if (SwingUtilities.isRightMouseButton(e)) {
           scale(0.9)
         }
@@ -174,11 +198,11 @@ class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel {
           }
         }
       }
-      override def mouseEntered(e: MouseEvent) {}
-      override def mousePressed(e: MouseEvent) {}
-      override def mouseExited(e: MouseEvent) {}
-      override def mouseReleased(e: MouseEvent) {}
-    }    
+      override def mouseEntered(e: MouseEvent): Unit = {}
+      override def mousePressed(e: MouseEvent): Unit = {}
+      override def mouseExited(e: MouseEvent): Unit = {}
+      override def mouseReleased(e: MouseEvent): Unit = {}
+    }
   }
 
   def showToolTip(text: String): Unit = {
@@ -187,7 +211,7 @@ class VisualDrawing(flipped: Boolean, scalable: Boolean) extends JPanel {
 }
 
 object VisualDrawing {
-  
+
   def apply(flipped: Boolean = true, scalable: Boolean = false): VisualDrawing = {
     new VisualDrawing(flipped, scalable)
   }
