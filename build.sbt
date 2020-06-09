@@ -4,7 +4,8 @@ lazy val oscarVisual = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "oscarlib",
-      scalaVersion := "2.13.2"
+      scalaVersion := "2.12.11",
+      version := "5.0.0"
 	)),
     name := "oscar-visual").
   dependsOn(oscarUtil)
