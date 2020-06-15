@@ -11,7 +11,7 @@ class VisualTour(nodesPos: Array[(Int, Int)], scale: Boolean, autoRepaint: Boole
 
   margin(20) // Prevents nodes from being positioned on the borders of the panel
 
-  val nNodes = nodesPos.size
+  val nNodes = nodesPos.length
 
   // Edges have to be printed before nodes
   protected val edges: Array[VisualLine] = Array.tabulate(nNodes)(i => {

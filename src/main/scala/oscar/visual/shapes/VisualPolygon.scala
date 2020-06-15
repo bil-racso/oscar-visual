@@ -24,7 +24,7 @@ class VisualPolygon(d: VisualDrawing, s: Polygon) extends VisualShape(d) {
   type S = Polygon
   protected val shape = s
 
-  def reset(): Unit = shape.reset
+  def reset(): Unit = shape.reset()
 
   def addVertices(vertices: Iterable[(Int, Int)]): Unit = {
     for (v <- vertices) shape.addPoint(v._1, v._2)

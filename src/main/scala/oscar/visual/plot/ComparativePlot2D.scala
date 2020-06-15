@@ -13,7 +13,7 @@ import oscar.visual.VisualFrame
 
 class ComparativePlot2D(title: String, xLabel: String, yLabel: String, seriesName: Array[String], lineVisible: Array[Boolean], pointVisible: Array[Boolean]) extends JPanel(new BorderLayout) {
   
-  val nbSeries = seriesName.size
+  val nbSeries = seriesName.length
   val seriesTab: Array[XYSeries] = Array.tabulate(nbSeries)(i => new XYSeries(seriesName(i)))
 
   val xyDataSet: XYSeriesCollection = new XYSeriesCollection
@@ -50,8 +50,8 @@ object ComparativePlot2D {
   }
   
   def apply(title: String, xLabel: String, yLabel: String, seriesName: Array[String], lineVisible: Boolean = true, pointVisible: Boolean = true): ComparativePlot2D = {
-    val lineVisibleArray = Array.fill(seriesName.size)(lineVisible)
-    val pointVisibleArray = Array.fill(seriesName.size)(pointVisible)
+    val lineVisibleArray = Array.fill(seriesName.length)(lineVisible)
+    val pointVisibleArray = Array.fill(seriesName.length)(pointVisible)
     new ComparativePlot2D(title, xLabel, yLabel, seriesName, lineVisibleArray, pointVisibleArray)
   }
 }

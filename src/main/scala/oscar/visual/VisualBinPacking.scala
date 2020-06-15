@@ -1,8 +1,9 @@
 package oscar.visual
 
-import oscar.visual.shapes.VisualRectangle
 import java.awt.geom.Rectangle2D
 import java.awt.Color
+
+import oscar.visual.shapes.VisualRectangle
 
 class VisualBinPacking(binWidth: Int, autoRepaint: Boolean) extends VisualDrawing(true, false) {
   
@@ -59,7 +60,7 @@ object VisualBinPackingExample extends App {
   val items = Array.tabulate(20)(i => binPacking.addItem(i, rand.nextInt(91) + 10))
   
   for (_ <- 0 until 100) {
-    val item = rand.nextInt(items.size)
+    val item = rand.nextInt(items.length)
     val bin = rand.nextInt(10)
     items(item).bin = bin
     Thread.sleep(500)

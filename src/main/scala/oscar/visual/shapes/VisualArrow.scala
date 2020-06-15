@@ -7,7 +7,6 @@ import java.awt.Graphics2D
 import java.awt.geom.AffineTransform
 import oscar.visual.VisualFrame
 import java.awt.Color
-import java.awt.BasicStroke
 
 class VisualArrow(d: VisualDrawing, s: Line2D.Double, dim: Int) extends VisualLine(d, s) {
 
